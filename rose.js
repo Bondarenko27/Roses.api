@@ -1,8 +1,9 @@
 const express = require('express')
 const app = express()
-const port = process.env.PORT||3000;
+var port = process.env.PORT||3000;
 const mysql = require('mysql');
 app.use(express.json());
+app.use(express.static('/statique'));
 app.use(express.urlencoded({ extended: true }));
 var con = mysql.createConnection({
     host: "localhost",
@@ -12,22 +13,31 @@ var con = mysql.createConnection({
 });
 
 app.post('/addRose', (req, res) =>  {
+
+    try{
+        console.log(req.body);
     
-    roseName = (req.body.roseName),
-    roseType = (req.body.roseType),
-    fragrant = (req.body.fragrant),
-    roseColour =(req.body.roseColour)
+    const roseName = (req.body.roseName)
+    const roseType = (req.body.roseType)
+    const fragrant = (req.body.fragrant)
+    const roseColour =(req.body.roseColour)
+    const image=(req.body.image)
         con.connect(function(err){
         if (err) throw err;
         console.log("Connected!"); 
-        var sql = "INSERT INTO roses(roseName, roseType, fragrant,roseColour) VALUES ('" + roseName + "','" + roseType + "','" + fragrant + "','" + roseColour + "');";
+        var sql = "INSERT INTO roses(roseName, roseType, fragrant,roseColour,image) VALUES ('" + roseName + "','" + roseType + "','" + fragrant + "','" + roseColour + "','" + image + "');";
         con.query(sql, function (err, result) {
             if (err) throw err;
             res.send("1 record inserted");
             
           });
 
-        });
+        });}
+        
+        catch(error){
+            console.log()
+        }
+    
 
         
 
@@ -46,6 +56,36 @@ app.post('/addRose', (req, res) =>  {
         });
     
     });
+    app.get("/image",(req,res)=>{
+    const id =1
+        const sqlInsert ="SELECT image FROM roses WHERE id =?;"
+        con.query(sqlInsert,[id],(err,result)=>{
+            if(err){
+                console.log(err)
+                res.send({
+                    msg: err
+                })
+            }
+            if(result){
+                console.log(result);
+                const path = require('path');
+
+                var options = {
+                    root: path.join('statique')
+                };
+                res.sendFile(result.image,options,function(err){
+                    if(err){
+                        console.log();
+                    }
+                })
+                ({
+                    
+                });
+            }
+
+        });
+    })
+    
     app.get('/roseID', (req, res) => {
             //show pages with id
             
