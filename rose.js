@@ -1,4 +1,6 @@
 const express = require('express')
+const multer = require('multer')
+const upload = multer ({dest:'statique/'})
 const app = express()
 var port = process.env.PORT||3000;
 const mysql = require('mysql');
@@ -12,16 +14,26 @@ var con = mysql.createConnection({
     database: "roses.api",
 });
 
-app.post('/addRose', (req, res) =>  {
+app.post('/addRose',upload.single('image'), (req, res) =>  {
 
     try{
-        console.log(req.body);
+        console.log(req.file,req.body);
     
     const roseName = (req.body.roseName)
     const roseType = (req.body.roseType)
     const fragrant = (req.body.fragrant)
     const roseColour =(req.body.roseColour)
     const image=(req.body.image)
+    const storage = multer.diskStorage({
+        destination: function(req, file, cb) {
+            cb(null, 'statique/');
+        },
+    
+        // By default, multer removes file extensions so let's add them back
+        filename: function(req, file, cb) {
+            cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+        }
+    });
         con.connect(function(err){
         if (err) throw err;
         console.log("Connected!"); 
